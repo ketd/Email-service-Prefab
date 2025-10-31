@@ -75,6 +75,7 @@ exclude = [".git", "__pycache__", ".venv", "build", "dist"]
 
 [dependency-groups]
 dev = [
+    "flake8>=7.3.0",
     "isort>=7.0.0",
     "pre-commit>=4.3.0",
     "tomli>=2.3.0",

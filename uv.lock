@@ -137,6 +137,7 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "flake8" },
     { name = "isort" },
     { name = "pre-commit" },
     { name = "tomli" },
@@ -155,6 +156,7 @@ provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "flake8", specifier = ">=7.3.0" },
     { name = "isort", specifier = ">=7.0.0" },
     { name = "pre-commit", specifier = ">=4.3.0" },
     { name = "tomli", specifier = ">=2.3.0" },

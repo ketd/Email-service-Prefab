@@ -208,7 +208,7 @@ def send_email(
                 "success": False,
                 "error": f"连接 SMTP 服务器失败: {str(e)}",
                 "error_code": "SMTP_CONNECTION_ERROR"
-        }
+            }
 
     except Exception as e:
         return {
@@ -326,15 +326,21 @@ EMAIL_TEMPLATES = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
-        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
-        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;
+               color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+                   padding: 30px; text-align: center; }}
         .header h1 {{ margin: 0; font-size: 28px; font-weight: 600; }}
         .content {{ padding: 30px; }}
         .content h2 {{ color: #667eea; margin-top: 0; }}
-        .message {{ background: #f8f9fa; padding: 20px; border-left: 4px solid #667eea; border-radius: 5px; margin: 20px 0; }}
-        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e0e0e0; }}
-        .button {{ display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
+        .message {{ background: #f8f9fa; padding: 20px; border-left: 4px solid #667eea;
+                    border-radius: 5px; margin: 20px 0; }}
+        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666;
+                   font-size: 14px; border-top: 1px solid #e0e0e0; }}
+        .button {{ display: inline-block; padding: 12px 30px; background: #667eea; color: white;
+                   text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
         .button:hover {{ background: #5568d3; }}
     </style>
 </head>
@@ -365,19 +371,26 @@ EMAIL_TEMPLATES = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
-        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
-        .header {{ background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 40px; text-align: center; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;
+               color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;
+                   padding: 40px; text-align: center; }}
         .header h1 {{ margin: 0; font-size: 32px; font-weight: 600; }}
         .welcome-icon {{ font-size: 60px; margin-bottom: 10px; }}
         .content {{ padding: 30px; }}
         .welcome-message {{ font-size: 18px; margin: 20px 0; color: #555; }}
         .features {{ background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }}
         .feature-item {{ margin: 10px 0; padding-left: 25px; position: relative; }}
-        .feature-item:before {{ content: "✓"; position: absolute; left: 0; color: #43e97b; font-weight: bold; }}
-        .button {{ display: inline-block; padding: 15px 40px; background: #43e97b; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; font-size: 16px; }}
+        .feature-item:before {{ content: "✓"; position: absolute; left: 0; color: #43e97b;
+                                font-weight: bold; }}
+        .button {{ display: inline-block; padding: 15px 40px; background: #43e97b; color: white;
+                   text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600;
+                   font-size: 16px; }}
         .button:hover {{ background: #3bd66f; }}
-        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e0e0e0; }}
+        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666;
+                   font-size: 14px; border-top: 1px solid #e0e0e0; }}
     </style>
 </head>
 <body>
@@ -408,18 +421,24 @@ EMAIL_TEMPLATES = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
-        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
-        .header {{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 30px; text-align: center; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;
+               color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;
+                   padding: 30px; text-align: center; }}
         .header h1 {{ margin: 0; font-size: 28px; font-weight: 600; }}
         .alert-icon {{ font-size: 60px; margin-bottom: 10px; }}
         .content {{ padding: 30px; }}
-        .alert-box {{ background: #fff3cd; border-left: 4px solid #f5576c; padding: 20px; border-radius: 5px; margin: 20px 0; }}
+        .alert-box {{ background: #fff3cd; border-left: 4px solid #f5576c; padding: 20px;
+                      border-radius: 5px; margin: 20px 0; }}
         .alert-title {{ color: #f5576c; font-weight: 600; font-size: 18px; margin-bottom: 10px; }}
         .details {{ background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }}
-        .button {{ display: inline-block; padding: 12px 30px; background: #f5576c; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
+        .button {{ display: inline-block; padding: 12px 30px; background: #f5576c; color: white;
+                   text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
         .button:hover {{ background: #e04656; }}
-        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e0e0e0; }}
+        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666;
+                   font-size: 14px; border-top: 1px solid #e0e0e0; }}
     </style>
 </head>
 <body>
@@ -451,20 +470,26 @@ EMAIL_TEMPLATES = {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
-        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
-        .header {{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 30px; text-align: center; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6;
+               color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 10px;
+                      box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }}
+        .header {{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;
+                   padding: 30px; text-align: center; }}
         .header h1 {{ margin: 0; font-size: 28px; font-weight: 600; }}
         .content {{ padding: 30px; }}
         .summary {{ background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }}
         .summary-title {{ color: #4facfe; font-weight: 600; font-size: 18px; margin-bottom: 15px; }}
         .stats {{ display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }}
-        .stat-card {{ flex: 1; min-width: 150px; background: white; border: 2px solid #e0e0e0; border-radius: 5px; padding: 15px; text-align: center; }}
+        .stat-card {{ flex: 1; min-width: 150px; background: white; border: 2px solid #e0e0e0;
+                      border-radius: 5px; padding: 15px; text-align: center; }}
         .stat-value {{ font-size: 32px; font-weight: 600; color: #4facfe; }}
         .stat-label {{ color: #666; font-size: 14px; margin-top: 5px; }}
-        .button {{ display: inline-block; padding: 12px 30px; background: #4facfe; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
+        .button {{ display: inline-block; padding: 12px 30px; background: #4facfe; color: white;
+                   text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: 600; }}
         .button:hover {{ background: #3d9ee6; }}
-        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px; border-top: 1px solid #e0e0e0; }}
+        .footer {{ background: #f8f9fa; padding: 20px; text-align: center; color: #666;
+                   font-size: 14px; border-top: 1px solid #e0e0e0; }}
     </style>
 </head>
 <body>
