@@ -1,34 +1,75 @@
 {
   "schema_version": "1.0",
-  "id": "hello-world-prefab",
-  "version": "0.1.1",
-  "name": "Hello World 示例预制件",
-  "description": "一个简单的示例预制件，展示如何创建可被 AI 调用的函数（v3.0 架构）",
+  "id": "email-service-prefab",
+  "version": "1.0.0",
+  "name": "邮件服务预制件",
+  "description": "基于 SMTP 协议的邮件发送服务，支持 HTML 内容、抄送、密送和附件",
   "author": "Your Name",
-  "github_url": "https://github.com/your-org/your-prefab",
+  "github_url": "https://github.com/your-org/email-service-prefab",
   "tags": [
-    "example",
-    "hello-world",
-    "tutorial"
+    "email",
+    "smtp",
+    "mail",
+    "notification"
   ],
   "entry_point": "src/main.py",
   "dependencies_file": "pyproject.toml",
   "functions": [
     {
-      "name": "greet",
-      "description": "向用户问候",
+      "name": "send_email",
+      "description": "发送邮件，支持 HTML 内容、抄送、密送和附件",
       "parameters": [
         {
-          "name": "name",
+          "name": "to",
           "type": "string",
-          "description": "要问候的名字",
+          "description": "收件人邮箱地址，多个地址用逗号分隔，例如 'user1@example.com,user2@example.com'",
+          "required": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "description": "邮件主题",
+          "required": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "description": "邮件正文内容",
+          "required": true
+        },
+        {
+          "name": "cc",
+          "type": "string",
+          "description": "抄送地址，多个地址用逗号分隔",
+          "required": false
+        },
+        {
+          "name": "bcc",
+          "type": "string",
+          "description": "密送地址，多个地址用逗号分隔",
+          "required": false
+        },
+        {
+          "name": "body_type",
+          "type": "string",
+          "description": "邮件正文类型，'plain' 表示纯文本，'html' 表示 HTML 格式",
           "required": false,
-          "default": "World"
+          "default": "plain",
+          "enum": ["plain", "html"]
+        },
+        {
+          "name": "attachments",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "附件文件路径列表",
+          "required": false
         }
       ],
       "returns": {
         "type": "object",
-        "description": "包含问候结果的对象",
+        "description": "包含发送结果的对象",
         "properties": {
           "success": {
             "type": "boolean",
@@ -36,63 +77,36 @@
           },
           "message": {
             "type": "string",
-            "description": "问候消息（成功时）",
+            "description": "成功消息（成功时）",
             "optional": true
           },
-          "name": {
-            "type": "string",
-            "description": "问候的名字（成功时）",
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "收件人列表（成功时）",
             "optional": true
           },
-          "error": {
-            "type": "string",
-            "description": "错误信息（失败时）",
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "抄送列表（成功时且有抄送）",
             "optional": true
           },
-          "error_code": {
-            "type": "string",
-            "description": "错误代码（失败时）",
-            "optional": true,
-            "enum": [
-              "INVALID_NAME",
-              "UNEXPECTED_ERROR"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "echo",
-      "description": "回显输入的文本",
-      "parameters": [
-        {
-          "name": "text",
-          "type": "string",
-          "description": "要回显的文本",
-          "required": true
-        }
-      ],
-      "returns": {
-        "type": "object",
-        "description": "包含回显结果的对象",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "操作是否成功"
-          },
-          "original": {
-            "type": "string",
-            "description": "原始文本（成功时）",
-            "optional": true
-          },
-          "echo": {
-            "type": "string",
-            "description": "回显的文本（成功时）",
-            "optional": true
-          },
-          "length": {
+          "bcc_count": {
             "type": "integer",
-            "description": "文本长度（成功时）",
+            "description": "密送人数（成功时且有密送）",
+            "optional": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "附件文件名列表（成功时且有附件）",
             "optional": true
           },
           "error": {
@@ -105,199 +119,141 @@
             "description": "错误代码（失败时）",
             "optional": true,
             "enum": [
-              "EMPTY_TEXT",
+              "MISSING_SMTP_CONFIG",
+              "INVALID_RECIPIENT",
+              "INVALID_SUBJECT",
+              "INVALID_BODY",
+              "INVALID_BODY_TYPE",
+              "ATTACHMENT_NOT_FOUND",
+              "ATTACHMENT_ERROR",
+              "INVALID_PORT",
+              "SMTP_AUTH_ERROR",
+              "SMTP_ERROR",
+              "SMTP_CONNECTION_ERROR",
               "UNEXPECTED_ERROR"
             ]
+          },
+          "missing_configs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "缺少的配置项列表（当错误代码为 MISSING_SMTP_CONFIG 时）",
+            "optional": true
           }
-        }
-      }
-    },
-    {
-      "name": "add_numbers",
-      "description": "计算两个数字的和",
-      "parameters": [
-        {
-          "name": "a",
-          "type": "number",
-          "description": "第一个数字",
-          "required": true
-        },
-        {
-          "name": "b",
-          "type": "number",
-          "description": "第二个数字",
-          "required": true
-        }
-      ],
-      "returns": {
-        "type": "object",
-        "description": "包含计算结果的对象",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "操作是否成功"
-          },
-          "a": {
-            "type": "number",
-            "description": "第一个数字（成功时）",
-            "optional": true
-          },
-          "b": {
-            "type": "number",
-            "description": "第二个数字（成功时）",
-            "optional": true
-          },
-          "sum": {
-            "type": "number",
-            "description": "计算结果（成功时）",
-            "optional": true
-          },
-          "error": {
-            "type": "string",
-            "description": "错误信息（失败时）",
-            "optional": true
-          },
-          "error_code": {
-            "type": "string",
-            "description": "错误代码（失败时）",
-            "optional": true,
-            "enum": [
-              "CALCULATION_ERROR",
-              "UNEXPECTED_ERROR"
-            ]
-          }
-        }
-      }
-    },
-    {
-      "name": "process_text_file",
-      "description": "处理文本文件（演示文件输入输出，v3.0 架构）",
-      "files": {
-        "input": {
-          "type": "array",
-          "items": {
-            "type": "InputFile"
-          },
-          "minItems": 1,
-          "maxItems": 1,
-          "description": "输入文本文件",
-          "required": true
-        },
-        "output": {
-          "type": "array",
-          "items": {
-            "type": "OutputFile"
-          },
-          "description": "处理后的文本文件"
         }
       },
-      "parameters": [
+      "secrets": [
         {
-          "name": "operation",
-          "type": "string",
-          "description": "操作类型（uppercase, lowercase, reverse）",
-          "required": false,
-          "default": "uppercase",
-          "enum": [
-            "uppercase",
-            "lowercase",
-            "reverse"
-          ]
+          "name": "SMTP_HOST",
+          "description": "SMTP 服务器地址",
+          "instructions": "例如：smtp.gmail.com（Gmail）、smtp.qq.com（QQ 邮箱）、smtp.163.com（网易邮箱）",
+          "required": true
+        },
+        {
+          "name": "SMTP_PORT",
+          "description": "SMTP 服务器端口",
+          "instructions": "常用端口：587（TLS）、465（SSL）、25（非加密，不推荐）",
+          "required": true
+        },
+        {
+          "name": "SMTP_USERNAME",
+          "description": "SMTP 用户名（通常是完整的邮箱地址）",
+          "instructions": "例如：your-email@example.com",
+          "required": true
+        },
+        {
+          "name": "SMTP_PASSWORD",
+          "description": "SMTP 密码或授权码",
+          "instructions": "注意：某些邮件服务商（如 Gmail、QQ 邮箱）需要使用应用专用密码或授权码，而不是账户登录密码。请查阅您的邮件服务商文档获取授权码。",
+          "required": true
+        },
+        {
+          "name": "SMTP_USE_TLS",
+          "description": "是否使用 TLS 加密连接",
+          "instructions": "值为 'true' 或 'false'。端口 587 通常使用 TLS（设为 true），端口 465 使用 SSL（设为 false）。默认为 true。",
+          "required": false
         }
-      ],
-      "returns": {
-        "type": "object",
-        "description": "包含处理结果的对象（不包含文件路径）",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "操作是否成功"
-          },
-          "operation": {
-            "type": "string",
-            "description": "执行的操作（成功时）",
-            "optional": true
-          },
-          "original_length": {
-            "type": "integer",
-            "description": "原始文本长度（成功时）",
-            "optional": true
-          },
-          "processed_length": {
-            "type": "integer",
-            "description": "处理后文本长度（成功时）",
-            "optional": true
-          },
-          "error": {
-            "type": "string",
-            "description": "错误信息（失败时）",
-            "optional": true
-          },
-          "error_code": {
-            "type": "string",
-            "description": "错误代码（失败时）",
-            "optional": true,
-            "enum": [
-              "NO_INPUT_FILE",
-              "FILE_NOT_FOUND",
-              "INVALID_OPERATION",
-              "PROCESSING_ERROR"
-            ]
-          }
-        }
-      }
+      ]
     },
     {
-      "name": "fetch_weather",
-      "description": "获取指定城市的天气信息（演示如何使用 secrets）",
+      "name": "send_bulk_email",
+      "description": "批量发送邮件，向多个收件人分别发送相同内容的邮件",
       "parameters": [
         {
-          "name": "city",
-          "type": "string",
-          "description": "要查询天气的城市名称，例如 '北京'",
+          "name": "recipients",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "收件人邮箱地址列表",
           "required": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "description": "邮件主题",
+          "required": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "description": "邮件正文内容",
+          "required": true
+        },
+        {
+          "name": "body_type",
+          "type": "string",
+          "description": "邮件正文类型，'plain' 表示纯文本，'html' 表示 HTML 格式",
+          "required": false,
+          "default": "plain",
+          "enum": ["plain", "html"]
         }
       ],
       "returns": {
         "type": "object",
-        "description": "包含天气信息的对象",
+        "description": "包含批量发送结果的对象",
         "properties": {
           "success": {
             "type": "boolean",
-            "description": "操作是否成功"
+            "description": "所有邮件是否都发送成功"
           },
-          "city": {
-            "type": "string",
-            "description": "城市名称（成功时）",
+          "total": {
+            "type": "integer",
+            "description": "总邮件数",
             "optional": true
           },
-          "temperature": {
-            "type": "number",
-            "description": "摄氏温度（成功时）",
+          "succeeded": {
+            "type": "integer",
+            "description": "成功发送的邮件数",
             "optional": true
           },
-          "condition": {
-            "type": "string",
-            "description": "天气状况，例如 '晴天'（成功时）",
+          "failed": {
+            "type": "integer",
+            "description": "发送失败的邮件数",
             "optional": true
           },
-          "note": {
-            "type": "string",
-            "description": "备注信息（成功时）",
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "每封邮件的发送结果详情",
             "optional": true
           },
           "error": {
             "type": "string",
-            "description": "错误信息（失败时）",
+            "description": "错误信息（参数验证失败时）",
             "optional": true
           },
           "error_code": {
             "type": "string",
-            "description": "错误代码（失败时）",
+            "description": "错误代码（参数验证失败时）",
             "optional": true,
             "enum": [
-              "MISSING_API_KEY",
-              "INVALID_CITY",
+              "INVALID_RECIPIENTS",
+              "INVALID_SUBJECT",
+              "INVALID_BODY",
               "UNEXPECTED_ERROR"
             ]
           }
@@ -305,10 +261,192 @@
       },
       "secrets": [
         {
-          "name": "WEATHER_API_KEY",
-          "description": "用于认证天气服务的 API 密钥",
-          "instructions": "这是一个演示示例。在实际使用中，您需要访问天气服务提供商的网站（例如 https://www.weather-provider.com/api-keys）注册并获取您的免费 API Key。",
+          "name": "SMTP_HOST",
+          "description": "SMTP 服务器地址",
+          "instructions": "例如：smtp.gmail.com（Gmail）、smtp.qq.com（QQ 邮箱）、smtp.163.com（网易邮箱）",
           "required": true
+        },
+        {
+          "name": "SMTP_PORT",
+          "description": "SMTP 服务器端口",
+          "instructions": "常用端口：587（TLS）、465（SSL）、25（非加密，不推荐）",
+          "required": true
+        },
+        {
+          "name": "SMTP_USERNAME",
+          "description": "SMTP 用户名（通常是完整的邮箱地址）",
+          "instructions": "例如：your-email@example.com",
+          "required": true
+        },
+        {
+          "name": "SMTP_PASSWORD",
+          "description": "SMTP 密码或授权码",
+          "instructions": "注意：某些邮件服务商（如 Gmail、QQ 邮箱）需要使用应用专用密码或授权码，而不是账户登录密码。请查阅您的邮件服务商文档获取授权码。",
+          "required": true
+        },
+        {
+          "name": "SMTP_USE_TLS",
+          "description": "是否使用 TLS 加密连接",
+          "instructions": "值为 'true' 或 'false'。端口 587 通常使用 TLS（设为 true），端口 465 使用 SSL（设为 false）。默认为 true。",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "send_email_with_template",
+      "description": "使用预定义模板发送美观的 HTML 邮件，支持 notification（通知）、welcome（欢迎）、alert（警告）、report（报告）四种模板",
+      "parameters": [
+        {
+          "name": "to",
+          "type": "string",
+          "description": "收件人邮箱地址，多个地址用逗号分隔",
+          "required": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "description": "邮件主题",
+          "required": true
+        },
+        {
+          "name": "template_type",
+          "type": "string",
+          "description": "模板类型",
+          "required": true,
+          "enum": ["notification", "welcome", "alert", "report"]
+        },
+        {
+          "name": "template_data",
+          "type": "object",
+          "description": "模板数据，根据不同模板类型需要提供不同的字段。notification需要title/heading/message；welcome需要title/message；alert需要title/alert_title/message；report需要title/summary_title/message。可选字段包括button_text/button_url/features/details/stats/extra_content/footer",
+          "required": true
+        },
+        {
+          "name": "cc",
+          "type": "string",
+          "description": "抄送地址，多个地址用逗号分隔",
+          "required": false
+        },
+        {
+          "name": "bcc",
+          "type": "string",
+          "description": "密送地址，多个地址用逗号分隔",
+          "required": false
+        },
+        {
+          "name": "attachments",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "附件文件路径列表",
+          "required": false
+        }
+      ],
+      "returns": {
+        "type": "object",
+        "description": "包含发送结果的对象",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "操作是否成功"
+          },
+          "message": {
+            "type": "string",
+            "description": "成功消息（成功时）",
+            "optional": true
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "收件人列表（成功时）",
+            "optional": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "抄送列表（成功时且有抄送）",
+            "optional": true
+          },
+          "bcc_count": {
+            "type": "integer",
+            "description": "密送人数（成功时且有密送）",
+            "optional": true
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "附件文件名列表（成功时且有附件）",
+            "optional": true
+          },
+          "template_type": {
+            "type": "string",
+            "description": "使用的模板类型（成功时）",
+            "optional": true
+          },
+          "error": {
+            "type": "string",
+            "description": "错误信息（失败时）",
+            "optional": true
+          },
+          "error_code": {
+            "type": "string",
+            "description": "错误代码（失败时）",
+            "optional": true,
+            "enum": [
+              "INVALID_RECIPIENT",
+              "INVALID_SUBJECT",
+              "INVALID_TEMPLATE_TYPE",
+              "INVALID_TEMPLATE_DATA",
+              "MISSING_TEMPLATE_FIELD",
+              "MISSING_SMTP_CONFIG",
+              "ATTACHMENT_NOT_FOUND",
+              "ATTACHMENT_ERROR",
+              "INVALID_PORT",
+              "SMTP_AUTH_ERROR",
+              "SMTP_ERROR",
+              "SMTP_CONNECTION_ERROR",
+              "UNEXPECTED_ERROR"
+            ]
+          }
+        }
+      },
+      "secrets": [
+        {
+          "name": "SMTP_HOST",
+          "description": "SMTP 服务器地址",
+          "instructions": "例如：smtp.gmail.com（Gmail）、smtp.qq.com（QQ 邮箱）、smtp.163.com（网易邮箱）",
+          "required": true
+        },
+        {
+          "name": "SMTP_PORT",
+          "description": "SMTP 服务器端口",
+          "instructions": "常用端口：587（TLS）、465（SSL）、25（非加密，不推荐）",
+          "required": true
+        },
+        {
+          "name": "SMTP_USERNAME",
+          "description": "SMTP 用户名（通常是完整的邮箱地址）",
+          "instructions": "例如：your-email@example.com",
+          "required": true
+        },
+        {
+          "name": "SMTP_PASSWORD",
+          "description": "SMTP 密码或授权码",
+          "instructions": "注意：某些邮件服务商（如 Gmail、QQ 邮箱）需要使用应用专用密码或授权码，而不是账户登录密码。请查阅您的邮件服务商文档获取授权码。",
+          "required": true
+        },
+        {
+          "name": "SMTP_USE_TLS",
+          "description": "是否使用 TLS 加密连接",
+          "instructions": "值为 'true' 或 'false'。端口 587 通常使用 TLS（设为 true），端口 465 使用 SSL（设为 false）。默认为 true。",
+          "required": false
         }
       ]
     }

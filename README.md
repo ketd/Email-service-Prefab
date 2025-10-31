@@ -1,94 +1,507 @@
-# 🚀 AI 预制件模板 (Prefab Template)
+# 📧 邮件服务预制件 (Email Service Prefab)
 
-[![Build and Release](https://github.com/your-org/prefab-template/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/your-org/prefab-template/actions)
+[![Build and Release](https://github.com/your-org/email-service-prefab/actions/workflows/build-and-release.yml/badge.svg)](https://github.com/your-org/email-service-prefab/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/badge/managed%20by-uv-F67909.svg)](https://github.com/astral-sh/uv)
-[![Code style: flake8](https://img.shields.io/badge/code%20style-flake8-black)](https://flake8.pycqa.org/)
 
-> **这是一个标准化的预制件模板仓库，用于为 AI 编码平台创建可复用的高质量代码模块。**
+> **基于 SMTP 协议的邮件发送服务，支持 HTML 内容、抄送、密送和附件。**
 
 ## 📋 目录
 
-- [什么是预制件？](#什么是预制件)
+- [功能特性](#功能特性)
 - [快速开始](#快速开始)
-- [项目结构](#项目结构)
-- [开发指南](#开发指南)
-- [测试与验证](#测试与验证)
-- [发布流程](#发布流程)
-- [示例预制件](#示例预制件)
+- [配置说明](#配置说明)
+- [使用示例](#使用示例)
+- [API 文档](#api-文档)
+- [常见邮件服务商配置](#常见邮件服务商配置)
+- [开发与测试](#开发与测试)
 - [常见问题](#常见问题)
 
-**📚 更多文档**: [AI助手开发指南](AGENTS.md) | [贡献指南](CONTRIBUTING.md)
+## 功能特性
 
-## 什么是预制件？
-
-预制件 (Prefab) 是一个可被 AI 直接调用的、经过标准化打包的 Python 代码模块。它解决了 AI 在处理复杂业务逻辑时能力不足的问题，通过社区贡献的方式为平台提供高质量、可复用的代码组件。
-
-### 核心特性
-
-- ✅ **标准化结构**: 统一的文件组织和配置规范
-- 🤖 **AI 友好**: 明确的函数签名和元数据描述
-- 🚀 **自动化 CI/CD**: 一键测试、打包、发布
-- 📦 **依赖管理**: 自动打包运行时依赖
-- 🔒 **质量保证**: 强制性的代码检查和测试
-- 🔐 **密钥管理**: 完善的 secrets 支持
+- ✅ **SMTP 发送**: 支持标准 SMTP 协议
+- 📝 **多种格式**: 支持纯文本和 HTML 邮件
+- 🎨 **精美模板**: 4种预定义的响应式 HTML 模板（通知、欢迎、警告、报告）
+- 📎 **附件支持**: 可添加多个附件文件
+- 👥 **多收件人**: 支持抄送（CC）和密送（BCC）
+- 🔒 **安全连接**: 支持 TLS/SSL 加密
+- 🔐 **密钥管理**: 所有敏感信息通过环境变量管理
+- 🚀 **批量发送**: 支持批量发送邮件功能
+- 🧪 **完整测试**: 包含全面的单元测试（27个测试用例）
 
 ## 快速开始
 
-### 1. 使用此模板创建新仓库
+### 1. 配置环境变量
 
-点击 GitHub 上的 "Use this template" 按钮，或者克隆此仓库：
+在使用前，需要配置以下环境变量：
 
 ```bash
-git clone https://github.com/your-org/prefab-template.git my-prefab
-cd my-prefab
+export SMTP_HOST="smtp.example.com"        # SMTP 服务器地址
+export SMTP_PORT="587"                     # SMTP 端口（587 for TLS, 465 for SSL）
+export SMTP_USERNAME="your@email.com"      # 邮箱地址
+export SMTP_PASSWORD="your-password"       # 密码或授权码
+export SMTP_USE_TLS="true"                 # 是否使用 TLS（true/false）
 ```
 
-### 2. 安装开发依赖
+### 2. 发送第一封邮件
 
-使用现代化的 [uv](https://github.com/astral-sh/uv) 工具：
+```python
+from src.main import send_email
+
+result = send_email(
+    to="recipient@example.com",
+    subject="测试邮件",
+    body="这是一封测试邮件"
+)
+
+if result["success"]:
+    print(f"邮件发送成功！收件人: {result['recipients']}")
+else:
+    print(f"发送失败: {result['error']}")
+```
+
+### 3. 发送 HTML 邮件
+
+```python
+html_content = """
+<html>
+  <body>
+    <h1>欢迎使用邮件服务</h1>
+    <p>这是一封 <strong>HTML 格式</strong>的邮件。</p>
+  </body>
+</html>
+"""
+
+result = send_email(
+    to="recipient@example.com",
+    subject="HTML 邮件示例",
+    body=html_content,
+    body_type="html"
+)
+```
+
+## 配置说明
+
+### 必需的环境变量
+
+| 变量名 | 说明 | 示例 |
+|--------|------|------|
+| `SMTP_HOST` | SMTP 服务器地址 | `smtp.gmail.com` |
+| `SMTP_PORT` | SMTP 端口 | `587` (TLS) 或 `465` (SSL) |
+| `SMTP_USERNAME` | 邮箱地址 | `your@email.com` |
+| `SMTP_PASSWORD` | 密码或授权码 | `your-app-password` |
+
+### 可选的环境变量
+
+| 变量名 | 说明 | 默认值 |
+|--------|------|--------|
+| `SMTP_USE_TLS` | 是否使用 TLS | `true` |
+
+> **注意**: 某些邮件服务商（如 Gmail、QQ 邮箱）需要使用**应用专用密码或授权码**，而不是账户登录密码。
+
+## 使用示例
+
+### 1. 发送带抄送和密送的邮件
+
+```python
+result = send_email(
+    to="recipient1@example.com,recipient2@example.com",
+    subject="通知",
+    body="这是一封重要通知",
+    cc="manager@example.com",
+    bcc="admin@example.com"
+)
+```
+
+### 2. 发送带附件的邮件
+
+```python
+result = send_email(
+    to="recipient@example.com",
+    subject="报告",
+    body="请查收附件中的报告",
+    attachments=[
+        "/path/to/report.pdf",
+        "/path/to/data.xlsx"
+    ]
+)
+
+if result["success"]:
+    print(f"已发送附件: {result['attachments']}")
+```
+
+### 3. 批量发送邮件
+
+```python
+from src.main import send_bulk_email
+
+recipients = [
+    "user1@example.com",
+    "user2@example.com",
+    "user3@example.com"
+]
+
+result = send_bulk_email(
+    recipients=recipients,
+    subject="通知",
+    body="这是群发邮件的内容"
+)
+
+print(f"总数: {result['total']}")
+print(f"成功: {result['succeeded']}")
+print(f"失败: {result['failed']}")
+```
+
+### 4. 使用预定义模板发送美观邮件 ✨
+
+使用精美的 HTML 模板让邮件更专业：
+
+#### 4.1 通知模板（Notification）
+
+```python
+from src.main import send_email_with_template
+
+result = send_email_with_template(
+    to="user@example.com",
+    subject="系统通知",
+    template_type="notification",
+    template_data={
+        "title": "重要通知",
+        "heading": "您的账户已激活",
+        "message": "恭喜您！您的账户已成功激活，现在可以开始使用我们的服务了。",
+        "button_text": "立即开始",
+        "button_url": "https://example.com/dashboard"
+    }
+)
+```
+
+#### 4.2 欢迎模板（Welcome）
+
+```python
+result = send_email_with_template(
+    to="newuser@example.com",
+    subject="欢迎加入我们的平台！",
+    template_type="welcome",
+    template_data={
+        "title": "欢迎加入",
+        "message": "感谢您注册我们的服务！以下是您可以使用的功能：",
+        "features": [
+            "🚀 强大的工具和功能",
+            "👥 实时团队协作",
+            "🔒 企业级安全保护",
+            "📊 详细的数据分析"
+        ],
+        "button_text": "开始探索",
+        "button_url": "https://example.com/getting-started"
+    }
+)
+```
+
+#### 4.3 警告模板（Alert）
+
+```python
+result = send_email_with_template(
+    to="admin@example.com",
+    subject="安全警告",
+    template_type="alert",
+    template_data={
+        "title": "安全警告",
+        "alert_title": "检测到异常登录",
+        "message": "我们在您的账户中检测到异常登录活动，请立即检查。",
+        "details": {
+            "时间": "2024-01-15 10:30:00",
+            "IP地址": "192.168.1.100",
+            "位置": "北京",
+            "设备": "Chrome on Windows"
+        },
+        "button_text": "查看详情",
+        "button_url": "https://example.com/security/login-history"
+    }
+)
+```
+
+#### 4.4 报告模板（Report）
+
+```python
+result = send_email_with_template(
+    to="manager@example.com",
+    subject="月度数据报告",
+    template_type="report",
+    template_data={
+        "title": "2024年1月运营报告",
+        "summary_title": "本月亮点",
+        "message": "本月我们取得了显著的增长，以下是关键指标：",
+        "stats": [
+            {"label": "新增用户", "value": "1,234"},
+            {"label": "总收入", "value": "$56,789"},
+            {"label": "增长率", "value": "+15%"},
+            {"label": "客户满意度", "value": "98%"}
+        ],
+        "button_text": "查看完整报告",
+        "button_url": "https://example.com/reports/2024-01"
+    }
+)
+```
+
+**支持的模板类型：**
+- `notification` - 通知模板（紫色渐变）
+- `welcome` - 欢迎模板（绿色渐变）
+- `alert` - 警告模板（粉红色渐变）
+- `report` - 报告模板（蓝色渐变）
+
+所有模板都是**响应式设计**，在手机和桌面设备上都能完美显示！
+
+## API 文档
+
+### `send_email()`
+
+发送单封邮件。
+
+**参数：**
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `to` | string | ✅ | 收件人邮箱，多个地址用逗号分隔 |
+| `subject` | string | ✅ | 邮件主题 |
+| `body` | string | ✅ | 邮件正文 |
+| `cc` | string | ❌ | 抄送地址，多个地址用逗号分隔 |
+| `bcc` | string | ❌ | 密送地址，多个地址用逗号分隔 |
+| `body_type` | string | ❌ | 正文类型，`plain` 或 `html`，默认 `plain` |
+| `attachments` | list[string] | ❌ | 附件文件路径列表 |
+
+**返回值：**
+
+```python
+{
+    "success": true,
+    "message": "邮件发送成功",
+    "recipients": ["user@example.com"],
+    "cc": ["cc@example.com"],      # 可选
+    "bcc_count": 1,                # 可选
+    "attachments": ["file.pdf"]    # 可选
+}
+```
+
+**错误码：**
+
+- `MISSING_SMTP_CONFIG`: 缺少必需的 SMTP 配置
+- `INVALID_RECIPIENT`: 收件人地址无效
+- `INVALID_SUBJECT`: 邮件主题无效
+- `INVALID_BODY`: 邮件正文无效
+- `INVALID_BODY_TYPE`: 正文类型无效
+- `ATTACHMENT_NOT_FOUND`: 附件文件不存在
+- `ATTACHMENT_ERROR`: 处理附件失败
+- `INVALID_PORT`: SMTP 端口无效
+- `SMTP_AUTH_ERROR`: SMTP 认证失败
+- `SMTP_ERROR`: SMTP 错误
+- `SMTP_CONNECTION_ERROR`: 连接 SMTP 服务器失败
+- `UNEXPECTED_ERROR`: 未预期的错误
+
+### `send_bulk_email()`
+
+批量发送邮件，向多个收件人分别发送相同内容的邮件。
+
+**参数：**
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `recipients` | list[string] | ✅ | 收件人邮箱地址列表 |
+| `subject` | string | ✅ | 邮件主题 |
+| `body` | string | ✅ | 邮件正文 |
+| `body_type` | string | ❌ | 正文类型，`plain` 或 `html`，默认 `plain` |
+
+**返回值：**
+
+```python
+{
+    "success": true,
+    "total": 3,
+    "succeeded": 3,
+    "failed": 0,
+    "results": [
+        {
+            "recipient": "user1@example.com",
+            "success": true
+        },
+        {
+            "recipient": "user2@example.com",
+            "success": true
+        },
+        ...
+    ]
+}
+```
+
+### `send_email_with_template()`
+
+使用预定义模板发送美观的 HTML 邮件。
+
+**参数：**
+
+| 参数 | 类型 | 必需 | 说明 |
+|------|------|------|------|
+| `to` | string | ✅ | 收件人邮箱，多个地址用逗号分隔 |
+| `subject` | string | ✅ | 邮件主题 |
+| `template_type` | string | ✅ | 模板类型：`notification`, `welcome`, `alert`, `report` |
+| `template_data` | dict | ✅ | 模板数据，详见下方说明 |
+| `cc` | string | ❌ | 抄送地址，多个地址用逗号分隔 |
+| `bcc` | string | ❌ | 密送地址，多个地址用逗号分隔 |
+| `attachments` | list[string] | ❌ | 附件文件路径列表 |
+
+**模板数据说明：**
+
+**notification 模板：**
+- `title` ✅ - 标题
+- `heading` ✅ - 副标题
+- `message` ✅ - 消息内容
+- `button_text` ❌ - 按钮文字
+- `button_url` ❌ - 按钮链接
+- `extra_content` ❌ - 额外内容
+- `footer` ❌ - 页脚文字
+
+**welcome 模板：**
+- `title` ✅ - 标题
+- `message` ✅ - 欢迎消息
+- `features` ❌ - 功能列表（数组）
+- `button_text` ❌ - 按钮文字
+- `button_url` ❌ - 按钮链接
+- `extra_content` ❌ - 额外内容
+- `footer` ❌ - 页脚文字
+
+**alert 模板：**
+- `title` ✅ - 标题
+- `alert_title` ✅ - 警告标题
+- `message` ✅ - 警告消息
+- `details` ❌ - 详细信息（字典）
+- `button_text` ❌ - 按钮文字
+- `button_url` ❌ - 按钮链接
+- `extra_content` ❌ - 额外内容
+- `footer` ❌ - 页脚文字
+
+**report 模板：**
+- `title` ✅ - 标题
+- `summary_title` ✅ - 摘要标题
+- `message` ✅ - 报告内容
+- `stats` ❌ - 统计数据（数组，每项包含 `label` 和 `value`）
+- `button_text` ❌ - 按钮文字
+- `button_url` ❌ - 按钮链接
+- `extra_content` ❌ - 额外内容
+- `footer` ❌ - 页脚文字
+
+**返回值：**
+
+```python
+{
+    "success": true,
+    "message": "邮件发送成功",
+    "recipients": ["user@example.com"],
+    "template_type": "notification",  # 使用的模板类型
+    "cc": ["cc@example.com"],         # 可选
+    "bcc_count": 1,                   # 可选
+    "attachments": ["file.pdf"]       # 可选
+}
+```
+
+**错误码：**
+
+除了 `send_email()` 的所有错误码外，还包括：
+- `INVALID_TEMPLATE_TYPE`: 不支持的模板类型
+- `INVALID_TEMPLATE_DATA`: 模板数据无效
+- `MISSING_TEMPLATE_FIELD`: 缺少必需的模板字段
+
+## 常见邮件服务商配置
+
+### Gmail
+
+```bash
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USERNAME="your@gmail.com"
+SMTP_PASSWORD="your-app-password"  # 需要生成应用专用密码
+SMTP_USE_TLS="true"
+```
+
+**获取应用专用密码：**
+1. 访问 [Google 账户安全设置](https://myaccount.google.com/security)
+2. 启用"两步验证"
+3. 生成"应用专用密码"
+
+### QQ 邮箱
+
+```bash
+SMTP_HOST="smtp.qq.com"
+SMTP_PORT="587"
+SMTP_USERNAME="your@qq.com"
+SMTP_PASSWORD="authorization-code"  # 需要生成授权码
+SMTP_USE_TLS="true"
+```
+
+**获取授权码：**
+1. 登录 QQ 邮箱
+2. 设置 → 账户
+3. 开启 SMTP 服务，生成授权码
+
+### 网易邮箱（163）
+
+```bash
+SMTP_HOST="smtp.163.com"
+SMTP_PORT="465"
+SMTP_USERNAME="your@163.com"
+SMTP_PASSWORD="authorization-code"  # 需要生成授权码
+SMTP_USE_TLS="false"  # 使用 SSL
+```
+
+### Outlook / Office 365
+
+```bash
+SMTP_HOST="smtp.office365.com"
+SMTP_PORT="587"
+SMTP_USERNAME="your@outlook.com"
+SMTP_PASSWORD="your-password"
+SMTP_USE_TLS="true"
+```
+
+### 自定义 SMTP 服务器
+
+```bash
+SMTP_HOST="mail.yourdomain.com"
+SMTP_PORT="587"
+SMTP_USERNAME="your@yourdomain.com"
+SMTP_PASSWORD="your-password"
+SMTP_USE_TLS="true"
+```
+
+## 开发与测试
+
+### 安装开发依赖
 
 ```bash
 # 安装 uv（如果尚未安装）
 # Windows: powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 # macOS/Linux: curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# 同步依赖（自动创建虚拟环境）
+# 同步依赖
 uv sync --dev
 ```
 
-### 3. 安装 Git Hooks（强烈推荐）
-
-安装 pre-commit hooks 后，每次提交代码前会自动运行质量检查，避免提交有问题的代码：
+### 运行测试
 
 ```bash
-# 安装 pre-commit hooks
-uv run pre-commit install
-
-# 🎉 现在每次 git commit 都会自动检查代码质量！
-```
-
-**自动检查项目：**
-- ✅ Flake8 代码风格（防止 F401 等常见错误）
-- ✅ isort 导入排序
-- ✅ Manifest 验证
-- ✅ 单元测试
-- ✅ 版本同步检查
-
-### 4. 编写你的预制件
-
-1. **编辑 `src/main.py`**: 在这里编写你的核心业务逻辑
-2. **更新 `prefab-manifest.json`**: 描述你的函数签名和元数据
-3. **编写测试**: 在 `tests/test_main.py` 中添加单元测试
-
-### 5. 本地测试
-
-```bash
-# 运行测试
+# 运行所有测试
 uv run pytest tests/ -v
 
-# 代码风格检查
+# 运行特定测试
+uv run pytest tests/test_main.py::TestSendEmail -v
+
+# 查看测试覆盖率
+uv run pytest tests/ --cov=src --cov-report=html
+```
+
+### 代码质量检查
+
+```bash
+# Flake8 代码风格检查
 uv run flake8 src/ --max-line-length=120
 
 # 验证 manifest 一致性
@@ -98,680 +511,110 @@ uv run python scripts/validate_manifest.py
 uv run python scripts/quick_start.py
 ```
 
-### 6. 发布预制件
+### 安装 Git Hooks
+
+安装 pre-commit hooks 后，每次提交代码前会自动运行质量检查：
 
 ```bash
-# 方式一: 使用版本升级脚本（推荐）
-uv run python scripts/version_bump.py patch  # 1.0.0 -> 1.0.1
-# 或
-uv run python scripts/version_bump.py minor  # 1.0.0 -> 1.1.0
-# 或
-uv run python scripts/version_bump.py major  # 1.0.0 -> 2.0.0
-
-# 然后提交并推送
-git add .
-git commit -m "Bump version to x.x.x"
-git tag vx.x.x
-git push origin vx.x.x
-
-# 方式二: 手动更新
-# 1. 手动编辑 prefab-manifest.json 和 pyproject.toml 中的 version（必须保持一致）
-# 2. git tag v1.0.0
-# 3. git push origin v1.0.0
+uv run pre-commit install
 ```
 
-🎉 GitHub Actions 将自动完成测试、打包（生成 .whl 格式）和发布！
+## 常见问题
+
+### Q: 发送邮件时提示认证失败？
+
+**A:** 检查以下几点：
+1. 确认 SMTP 用户名和密码是否正确
+2. 某些邮件服务商需要使用**应用专用密码或授权码**，而不是账户登录密码
+3. 检查邮箱是否开启了 SMTP 服务
+
+### Q: 支持哪些邮件服务商？
+
+**A:** 支持所有遵循标准 SMTP 协议的邮件服务商，包括但不限于：
+- Gmail
+- QQ 邮箱
+- 网易邮箱（163、126）
+- Outlook / Office 365
+- 阿里云企业邮箱
+- 自建 SMTP 服务器
+
+### Q: TLS 和 SSL 有什么区别？
+
+**A:**
+- **TLS (端口 587)**: 先建立普通连接，再升级为加密连接（`SMTP_USE_TLS=true`）
+- **SSL (端口 465)**: 直接建立加密连接（`SMTP_USE_TLS=false`）
+
+大多数现代邮件服务商推荐使用 TLS（端口 587）。
+
+### Q: 如何发送给多个收件人？
+
+**A:** 有两种方式：
+1. **单封邮件多个收件人**: 使用逗号分隔地址
+   ```python
+   send_email(to="user1@example.com,user2@example.com", ...)
+   ```
+2. **批量发送**: 每个收件人收到独立的邮件
+   ```python
+   send_bulk_email(recipients=["user1@example.com", "user2@example.com"], ...)
+   ```
+
+### Q: 可以发送多大的附件？
+
+**A:** 附件大小限制取决于：
+1. SMTP 服务器的限制（通常为 10-25 MB）
+2. 收件人邮箱的限制
+
+建议单封邮件的附件总大小不超过 10 MB。
+
+### Q: 如何处理发送失败的邮件？
+
+**A:** 查看返回结果中的 `error` 和 `error_code` 字段：
+
+```python
+result = send_email(...)
+if not result["success"]:
+    print(f"错误: {result['error']}")
+    print(f"错误码: {result['error_code']}")
+    
+    # 根据错误码进行处理
+    if result["error_code"] == "SMTP_AUTH_ERROR":
+        print("请检查用户名和密码")
+    elif result["error_code"] == "SMTP_CONNECTION_ERROR":
+        print("请检查网络连接和 SMTP 服务器地址")
+```
 
 ## 项目结构
 
 ```
-prefab-template/
-├── .github/
-│   └── workflows/
-│       └── build-and-release.yml    # CI/CD 自动化流程
-├── data/                            # 数据文件目录
-│   ├── inputs/                      # 输入文件目录（开发/测试时使用）
-│   └── outputs/                     # 输出文件目录（开发/测试时使用）
-├── src/
-│   └── main.py                      # 预制件核心代码（必须）
-├── tests/
-│   └── test_main.py                 # 单元测试
-├── scripts/
-│   └── validate_manifest.py         # Manifest 验证脚本
-├── prefab-manifest.json             # 预制件元数据（必须）
-├── pyproject.toml                   # 项目配置和依赖
-├── .gitignore                       # Git 忽略文件
-├── LICENSE                          # 开源许可证
-└── README.md                        # 项目文档
+email-service-prefab/
+├── src/                          # 源代码
+│   ├── __init__.py              # 模块导出
+│   └── main.py                  # 核心邮件发送逻辑
+├── tests/                       # 测试
+│   └── test_main.py            # 单元测试
+├── scripts/                     # 辅助脚本
+│   ├── validate_manifest.py    # Manifest 验证
+│   ├── version_bump.py         # 版本管理
+│   └── quick_start.py          # 快速验证
+├── prefab-manifest.json         # 函数元数据
+├── pyproject.toml              # 项目配置
+└── README.md                   # 文档（本文件）
 ```
 
-## 开发指南
-
-### `src/main.py` - 核心业务逻辑
-
-这是你的预制件的唯一入口文件。所有暴露给 AI 的函数都必须在此文件中定义。
-
-**示例函数：**
-
-```python
-def analyze_dataset(data: list, operation: str = "statistics") -> dict:
-    """
-    分析数据集并返回统计结果
-
-    Args:
-        data: 数字列表
-        operation: 操作类型 ("statistics", "sum", "average")
-
-    Returns:
-        包含分析结果的字典
-    """
-    try:
-        if not data:
-            return {
-                "success": False,
-                "error": "数据集不能为空",
-                "error_code": "EMPTY_DATA"
-            }
-
-        if operation == "statistics":
-            stats = calculate_statistics(data)
-            return {
-                "success": True,
-                "data": {
-                    "operation": "statistics",
-                    "statistics": stats
-                }
-            }
-        # ... 其他操作类型
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "error_code": "UNEXPECTED_ERROR"
-        }
-```
-
-**编码规范：**
-
-- ✅ 使用类型提示 (Type Hints)
-- ✅ 编写清晰的 Docstring
-- ✅ 返回结构化的数据（通常是字典）
-- ✅ 包含错误处理
-- ❌ 避免使用全局状态
-- ❌ 不要在模块级别执行副作用操作
-
-### `prefab-manifest.json` - 元数据描述
-
-这是 AI 理解如何调用你的预制件的"API 契约"。**必须**与 `src/main.py` 中的函数签名保持一致。
-
-**字段说明：**
-
-```json
-{
-  "schema_version": "1.0",           // 清单模式版本（固定）
-  "id": "hello-world-prefab",        // 全局唯一的预制件 ID
-  "version": "1.0.0",                // 语义化版本号（与 pyproject.toml 和 Git Tag 一致）
-  "name": "预制件名称",              // 可读的预制件名称
-  "description": "预制件功能描述",    // 详细功能说明
-  "tags": ["tag1", "tag2"],          // 标签列表，用于分类和搜索
-  "entry_point": "src/main.py",      // 入口文件（固定）
-  "dependencies_file": "pyproject.toml",  // 依赖文件（固定）
-  "functions": [                     // 函数列表
-    {
-      "name": "analyze_dataset",     // 函数名（必须与代码一致）
-      "description": "分析数据集并返回统计结果",  // 功能描述
-      "parameters": [                // 参数列表
-        {
-          "name": "data",
-          "type": "array",           // 使用 JSON Schema 类型名
-          "description": "数字列表",
-          "required": true
-        },
-        {
-          "name": "operation",
-          "type": "string",          // 使用 JSON Schema 类型名
-          "description": "操作类型：'statistics', 'sum', 'average'",
-          "required": false,
-          "default": "statistics"
-        }
-      ],
-      "returns": {                   // 返回值描述（结构化 schema）
-        "type": "object",
-        "description": "返回结果对象",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "操作是否成功"
-          },
-          "data": {
-            "type": "object",
-            "description": "成功时的结果数据",
-            "optional": true
-          },
-          "error": {
-            "type": "string",
-            "description": "错误信息",
-            "optional": true
-          },
-          "error_code": {
-            "type": "string",
-            "description": "错误代码",
-            "optional": true
-          }
-        }
-      }
-    }
-  ],
-  "execution_environment": {         // 执行环境配置（可选）
-    "cpu": "1",                      // CPU 核心数
-    "memory": "512Mi"                // 内存大小
-  }
-}
-```
-
-**支持的类型：**
-
-*基础类型（对应 JSON Schema）：*
-- `string` - 字符串
-- `number` - 数字（整数或浮点数）
-- `integer` - 整数
-- `boolean` - 布尔值
-- `object` - 对象/字典
-- `array` - 数组/列表
-
-*平台感知类型（用于文件处理）：*
-- `InputFile` - 输入文件
-- `OutputFile` - 输出文件
-
-### 文件处理指南
-
-当你的预制件需要处理文件（如图片、视频、文档等）时，需要使用**固定的文件路径约定**。平台会自动将用户上传的文件放置到指定目录，并在函数执行完成后收集输出文件。
-
-#### 路径约定（重要！）
-
-**输入文件路径规则：**
-```
-data/inputs/{files中的key名称}/
-```
-
-**输出文件路径规则：**
-```
-data/outputs/
-```
-
-#### Manifest 配置示例
-
-如果你的函数需要接收文件输入，在 `prefab-manifest.json` 中这样声明：
-
-```json
-{
-  "functions": [{
-    "name": "process_video",
-    "description": "处理视频文件",
-    "parameters": [],
-    "files": {
-      "input": {
-        "type": "InputFile",
-        "description": "需要处理的视频文件",
-        "required": true,
-        "accept": ".mp4,.avi,.mov"
-      }
-    },
-    "returns": {
-      "type": "object",
-      "description": "处理结果"
-    }
-  }]
-}
-```
-
-**关键点：**
-- `files` 字段中的 key（如 `"input"`）决定了输入文件的路径
-- `type: "InputFile"` 表示这是输入文件
-- `accept` 可选，用于限制文件类型
-
-#### 代码实现示例
-
-```python
-from pathlib import Path
-
-def process_video() -> dict:
-    """处理视频文件"""
-    # 固定路径：data/inputs/{key}/
-    # 这里的 "input" 对应 manifest 中 files.input 的 key
-    DATA_INPUTS = Path("data/inputs/input")
-    DATA_OUTPUTS = Path("data/outputs")
-
-    # 确保输出目录存在
-    DATA_OUTPUTS.mkdir(parents=True, exist_ok=True)
-
-    try:
-        # 扫描输入文件（平台会自动将文件放到这里）
-        input_files = list(DATA_INPUTS.glob("*"))
-
-        if not input_files:
-            return {
-                "success": False,
-                "error": "未找到输入文件",
-                "error_code": "NO_INPUT_FILES"
-            }
-
-        # 处理第一个文件
-        input_file = input_files[0]
-        print(f"处理文件: {input_file}")
-
-        # 执行你的业务逻辑...
-        # result = do_something(input_file)
-
-        # 将输出文件保存到固定路径（平台会自动收集）
-        output_file = DATA_OUTPUTS / "output.mp4"
-        # save_result(output_file)
-
-        return {
-            "success": True,
-            "data": {
-                "processed_file": str(output_file.name),
-                "input_file": str(input_file.name)
-            }
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "error_code": "PROCESSING_ERROR"
-        }
-```
-
-#### 常见错误与注意事项
-
-**❌ 错误示例：缺少 key**
-```python
-# 这样会找不到文件！
-DATA_INPUTS = Path("data/inputs")  # 缺少 manifest 中定义的 key
-```
-
-**✅ 正确示例：包含完整路径**
-```python
-# 如果 manifest 中是 files.input
-DATA_INPUTS = Path("data/inputs/input")
-
-# 如果 manifest 中是 files.video
-DATA_INPUTS = Path("data/inputs/video")
-
-# 如果 manifest 中是 files.document
-DATA_INPUTS = Path("data/inputs/document")
-```
-
-**路径匹配规则：**
-- Manifest 中的 `files.{key}` → 代码中的 `data/inputs/{key}/`
-- `files.input` → `data/inputs/input/`
-- `files.video` → `data/inputs/video/`
-- `files.images` → `data/inputs/images/`
-
-**多文件输入：**
-如果需要接收多个文件，在 manifest 中定义多个 key：
-
-```json
-{
-  "files": {
-    "video": {
-      "type": "InputFile",
-      "description": "视频文件"
-    },
-    "subtitle": {
-      "type": "InputFile",
-      "description": "字幕文件",
-      "required": false
-    }
-  }
-}
-```
-
-代码中分别访问：
-```python
-video_path = Path("data/inputs/video")
-subtitle_path = Path("data/inputs/subtitle")
-```
-
-**输出文件命名：**
-- 输出文件统一保存到 `data/outputs/` 目录
-- 文件名可以自定义，建议使用有意义的名称
-- 平台会自动收集该目录下的所有文件
-
-### 密钥管理（Secrets）
-
-如果你的预制件需要使用 API Key、数据库连接字符串等敏感信息，可以在函数定义中声明 `secrets` 字段。平台会引导用户配置这些密钥，并在运行时自动注入到环境变量中。
-
-**在 manifest.json 中声明 secrets：**
-
-```json
-{
-  "functions": [
-    {
-      "name": "fetch_weather",
-      "description": "获取城市天气信息",
-      "parameters": [...],
-      "secrets": [
-        {
-          "name": "WEATHER_API_KEY",
-          "description": "用于认证天气服务的 API 密钥",
-          "instructions": "请访问 https://www.weather-provider.com/api-keys 注册并获取您的免费 API Key",
-          "required": true
-        }
-      ]
-    }
-  ]
-}
-```
-
-**在代码中使用 secrets：**
-
-```python
-import os
-
-def fetch_weather(city: str) -> dict:
-    """获取城市天气信息"""
-    # 从环境变量中读取密钥（平台会自动注入）
-    api_key = os.environ.get('WEATHER_API_KEY')
-
-    if not api_key:
-        return {
-            "success": False,
-            "error": "未配置 WEATHER_API_KEY",
-            "error_code": "MISSING_API_KEY"
-        }
-
-    # 使用 API Key 调用第三方服务
-    # response = requests.get(api_url, headers={"Authorization": f"Bearer {api_key}"})
-    ...
-```
-
-**Secrets 字段规范：**
-
-- `name` (必需): 密钥名称，必须是大写字母、数字和下划线（如 `API_KEY`, `DATABASE_URL`）
-- `description` (必需): 密钥用途的简短描述
-- `instructions` (推荐): 指导用户如何获取该密钥的说明
-- `required` (必需): 布尔值，标识该密钥是否为必需
-
-本模板包含完整的 secrets 使用示例，详见 `src/main.py` 中的 `fetch_weather` 函数。
-
-### 依赖管理
-
-在 `pyproject.toml` 中添加你的依赖：
-
-```toml
-[project]
-# 运行时依赖（会被打包到最终产物中）
-dependencies = [
-    "requests>=2.31.0",
-    "pandas>=2.0.0",
-]
-
-[project.optional-dependencies]
-# 开发/测试依赖（不会被打包）
-dev = [
-    "pytest>=7.4.0",
-    "flake8>=6.1.0",
-    "pytest-cov>=4.1.0",
-]
-```
-
-**使用 uv 管理依赖：**
-
-```bash
-# 添加运行时依赖
-uv add requests pandas
-
-# 添加开发依赖
-uv add --dev pytest flake8
-
-# 同步依赖
-uv sync --dev
-```
-
-## 测试与验证
-
-### 单元测试
-
-**使用真实数据文件进行测试** - 这是我们的核心测试理念。
-
-本模板展示了如何使用真实媒体文件（`tests/test.mp4`）进行功能测试：
-
-```python
-# tests/test_video.py
-import os
-import pytest
-from src.main import video_to_audio
-
-class TestVideoToAudio:
-    @pytest.fixture
-    def test_video_path(self):
-        """提供真实的测试视频文件"""
-        return os.path.join(os.path.dirname(__file__), "test.mp4")
-
-    def test_video_to_audio_default(self, test_video_path):
-        """使用真实视频测试转换功能"""
-        result = video_to_audio(test_video_path)
-
-        assert result["success"] is True
-        assert os.path.exists(result["data"]["output_file"])
-```
-
-**测试数据最佳实践：**
-- ✅ 将小型真实数据提交到 `tests/` 目录（< 5MB）
-- ✅ 测试可重现、可审核
-- ❌ 避免仅用 mock 数据
-
-**运行测试：**
-
-```bash
-# 运行所有测试（使用 uv）
-uv run --with pytest pytest tests/ -v
-
-# 运行特定测试
-uv run --with pytest pytest tests/test_video.py -v
-
-# 查看测试覆盖率
-uv run --with pytest --with pytest-cov pytest tests/ --cov=src --cov-report=html
-```
-
-### Manifest 验证
-
-验证 `prefab-manifest.json` 与代码的一致性：
-
-```bash
-python scripts/validate_manifest.py
-```
-
-此脚本会检查：
-- ✅ Manifest 中声明的函数是否都存在于 `main.py`
-- ✅ 函数参数的名称和必选/可选属性是否匹配
-- ⚠️  `main.py` 中的公共函数是否都在 Manifest 中声明
-
-## 发布流程
-
-### 自动化发布（推荐）
-
-整个发布流程完全自动化，你只需要：
-
-1. **更新版本号**: 编辑 `prefab-manifest.json`，修改 `version` 字段
-2. **提交更改**: `git add . && git commit -m "Release v1.0.0"`
-3. **创建标签**: `git tag v1.0.0`（版本号必须与 manifest 一致）
-4. **推送标签**: `git push origin v1.0.0`
-
-GitHub Actions 将自动执行以下步骤：
-
-```mermaid
-graph LR
-    A[推送 Tag] --> B[代码检查]
-    B --> C[运行测试]
-    C --> D[验证 Manifest]
-    D --> E[打包预制件]
-    E --> F[创建 Release]
-    F --> G[上传附件]
-```
-
-### 发布产物
-
-- **格式**: Python Wheel (`.whl`)（例如 `hello_world_prefab-0.1.0-py3-none-any.whl`）
-- **内容**:
-  - `src/` 目录（包含所有源代码）
-  - `prefab-manifest.json`（元数据文件）
-  - 所有运行时依赖（自动包含）
-- **位置**: GitHub Release 附件
-- **优势**: 标准 Python 包格式，兼容性更好，安装更便捷
-
-## 示例预制件
-
-本模板自带一个完整的科学计算示例预制件，包含一个功能丰富的函数：
-
-### `analyze_dataset(data, operation)` - 数据集分析
-
-支持多种操作类型：
-
-```python
-# 完整统计
-result = analyze_dataset([1, 2, 3, 4, 5], "statistics")
-# {"success": True, "data": {"operation": "statistics", "statistics": {...}}}
-
-# 求和
-result = analyze_dataset([10, 20, 30], "sum")
-# {"success": True, "data": {"operation": "sum", "value": 60, "count": 3}}
-
-# 平均值
-result = analyze_dataset([2, 4, 6], "average")
-# {"success": True, "data": {"operation": "average", "value": 4.0, "count": 3}}
-```
-
-你可以直接修改这个示例，或者完全替换为自己的业务逻辑。
-
-## AI 集成说明
-
-当你的预制件发布后，AI 平台将能够：
-
-1. **自动发现**: 通过 `prefab-manifest.json` 理解预制件的功能
-2. **智能调用**: 根据用户的自然语言需求，选择合适的函数并传递参数
-3. **解释结果**: 将函数返回值转换为用户友好的输出
-
-**用户体验示例：**
-
-> 用户: "帮我分析这组数据的统计信息：[10, 20, 30, 40, 50]"
-> AI: *调用 `analyze_dataset([10, 20, 30, 40, 50], "statistics")`*
-> AI: "已完成分析：共 5 个数据点，平均值 30.0，最大值 50，最小值 10"
-
-## 常见问题
-
-### Q: 我可以使用第三方库吗？
-
-**A**: 当然可以！使用 `uv add package-name` 添加运行时依赖，CI/CD 会自动打包。
-
-```bash
-# 添加运行时依赖（会被打包）
-uv add requests pandas
-
-# 添加开发依赖（不会被打包）
-uv add --dev pytest-mock
-```
-
-### Q: 如何处理敏感信息（如 API Key）？
-
-**A**: 推荐使用 `secrets` 功能：
-
-1. **在 manifest.json 中声明密钥**（推荐）- 平台会引导用户配置，并自动注入到环境变量
-2. 通过函数参数传递 - 适用于非敏感的配置项
-3. **绝对不要**将密钥硬编码到代码中
-
-**示例：** 参见本模板的 `fetch_weather` 函数及其 manifest 配置。
-
-更多信息请参阅上方的 [密钥管理](#密钥管理secrets---v30-新特性) 章节。
-
-### Q: 可以添加多个 `.py` 文件吗？
-
-**A**: 可以！你可以在 `src/` 目录中创建多个模块，但 `main.py` 必须是唯一的入口点。
-
-**示例结构：**
-```
-src/
-├── main.py                    # 主入口文件
-├── utils/                     # 工具模块包
-│   ├── __init__.py
-│   └── math_utils.py         # 数学工具
-└── other_module.py           # 其他模块（可选）
-```
-
-**使用方式：**
-```python
-# src/main.py
-try:
-    # 优先使用相对导入（打包时）
-    from .utils import helper_function
-except ImportError:
-    # 回退到绝对导入（开发/测试时）
-    from utils import helper_function
-
-def my_function():
-    return helper_function()
-```
-
-本模板已包含完整的多文件示例，参见 `src/utils/` 目录。
-
-### Q: 为什么要将测试数据提交到仓库？
-
-**A**:
-1. **可重现性** - 任何人都能运行测试并得到相同结果
-2. **可审核性** - 社区可以验证预制件确实能处理真实数据
-3. **CI/CD 自动化** - GitHub Actions 可以自动运行完整测试
-
-**最佳实践：**
-- 使用小型但真实的测试数据（如 5 秒的视频片段）
-- 在 README 中说明测试数据的来源和用途
-- 如果数据涉及版权，使用自己创建的测试数据
-
-### Q: 如何调试 CI/CD 失败？
-
-**A**:
-1. 查看 GitHub Actions 的日志输出
-2. 本地运行相同的命令进行复现：
-   - `uv run --with pytest pytest tests/ -v` - 测试失败？
-   - `uv run --with flake8 flake8 src/` - 代码风格问题？
-   - `uv run python scripts/validate_manifest.py` - Manifest 不一致？
-3. 检查是否使用了正确的 uv 环境
-
-### Q: 版本号规范是什么？
-
-**A**: 遵循语义化版本 (Semantic Versioning):
-- **主版本号 (MAJOR)**: 不兼容的 API 更改
-- **次版本号 (MINOR)**: 向后兼容的功能新增
-- **修订号 (PATCH)**: 向后兼容的问题修复
-
-示例: `v1.2.3` → `1.2.3`
-
-### Q: 可以发布私有预制件吗？
-
-**A**: 可以！将仓库设为私有即可。Release 也会是私有的。
-
-## 贡献指南
-
-欢迎为此模板贡献改进！请：
-
-1. Fork 此仓库
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 开启 Pull Request
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+在提交 PR 前，请确保：
+- ✅ 所有测试通过
+- ✅ 代码风格检查通过
+- ✅ Manifest 验证通过
+- ✅ 添加了相应的测试用例
 
 ## 许可证
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
-
-## 支持与反馈
-
-- 📖 [文档](https://github.com/your-org/prefab-template/wiki)
-- 🐛 [问题反馈](https://github.com/your-org/prefab-template/issues)
-- 💬 [讨论区](https://github.com/your-org/prefab-template/discussions)
+[MIT License](LICENSE)
 
 ---
 
-**祝你开发愉快！🎉**
-
-_如果这个模板对你有帮助，请给我们一个 ⭐ Star！_
+**📚 更多文档**: [AI 助手开发指南](AGENTS.md) | [贡献指南](CONTRIBUTING.md)
