@@ -511,34 +511,6 @@ class TestSendEmailWithTemplate:
         assert result["template_type"] == "report"
 
     @patch('smtplib.SMTP')
-    def test_send_template_with_attachments(self, mock_smtp, smtp_env, tmp_path):
-        """测试发送带附件的模板邮件"""
-        from src.main import send_email_with_template
-
-        mock_server = Mock()
-        mock_smtp.return_value = mock_server
-
-        # 创建临时文件
-        test_file = tmp_path / "test.txt"
-        test_file.write_text("test content")
-
-        result = send_email_with_template(
-            to="user@example.com",
-            subject="通知",
-            template_type="notification",
-            template_data={
-                "title": "通知",
-                "heading": "文件已准备好",
-                "message": "请查看附件"
-            },
-            attachments=[str(test_file)]
-        )
-
-        assert result["success"] is True
-        assert "attachments" in result
-        assert "test.txt" in result["attachments"]
-
-    @patch('smtplib.SMTP')
     def test_send_template_with_cc_bcc(self, mock_smtp, smtp_env):
         """测试发送带抄送和密送的模板邮件"""
         from src.main import send_email_with_template

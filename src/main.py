@@ -23,14 +23,17 @@ def send_email(
     body: str,
     cc: Optional[str] = None,
     bcc: Optional[str] = None,
-    body_type: str = "plain",
-    attachments: Optional[List[str]] = None
+    body_type: str = "plain"
 ) -> Dict[str, Any]:
     """
     发送邮件
 
     使用 SMTP 协议发送邮件，支持 HTML 内容、抄送、密送和附件。
     SMTP 配置通过环境变量提供，需要在平台上配置相应的 secrets。
+
+    📁 v3.0 文件约定：
+    - 附件自动从 data/inputs/attachments/ 目录读取
+    - Gateway 会自动下载文件到该目录
 
     Args:
         to: 收件人邮箱地址，多个地址用逗号分隔
@@ -39,7 +42,6 @@ def send_email(
         cc: 抄送地址，多个地址用逗号分隔（可选）
         bcc: 密送地址，多个地址用逗号分隔（可选）
         body_type: 邮件正文类型，"plain" 或 "html"，默认 "plain"
-        attachments: 附件文件路径列表（可选）
 
     Returns:
         包含发送结果的字典
@@ -52,6 +54,8 @@ def send_email(
         ... )
         {'success': True, 'message': '邮件发送成功', 'recipients': ['user@example.com']}
     """
+    # v3.0: 附件文件路径
+    ATTACHMENTS_DIR = Path("data/inputs/attachments")
     try:
         # 获取 SMTP 配置（从环境变量）
         smtp_host = os.environ.get('SMTP_HOST')
@@ -125,34 +129,28 @@ def send_email(
         # 添加邮件正文
         msg.attach(MIMEText(body, body_type, 'utf-8'))
 
-        # 添加附件
-        attached_files = []
-        if attachments:
-            for file_path in attachments:
-                try:
-                    path = Path(file_path)
-                    if not path.exists():
-                        return {
-                            "success": False,
-                            "error": f"附件文件不存在: {file_path}",
-                            "error_code": "ATTACHMENT_NOT_FOUND"
-                        }
+        # v3.0: 添加附件（自动扫描 data/inputs/attachments/ 目录）
+        if ATTACHMENTS_DIR.exists():
+            attachment_files = list(ATTACHMENTS_DIR.glob("*"))
+            # 过滤掉目录，只保留文件
+            attachment_files = [f for f in attachment_files if f.is_file()]
 
-                    with open(path, 'rb') as f:
+            for file_path in attachment_files:
+                try:
+                    with open(file_path, 'rb') as f:
                         part = MIMEBase('application', 'octet-stream')
                         part.set_payload(f.read())
                         encoders.encode_base64(part)
                         part.add_header(
                             'Content-Disposition',
-                            f'attachment; filename={path.name}'
+                            f'attachment; filename={file_path.name}'
                         )
                         msg.attach(part)
-                        attached_files.append(path.name)
 
                 except Exception as e:
                     return {
                         "success": False,
-                        "error": f"处理附件失败 ({file_path}): {str(e)}",
+                        "error": f"处理附件失败 ({file_path.name}): {str(e)}",
                         "error_code": "ATTACHMENT_ERROR"
                     }
 
@@ -187,8 +185,7 @@ def send_email(
                 "message": "邮件发送成功",
                 "recipients": to_addresses,
                 "cc": cc_addresses if cc_addresses else None,
-                "bcc_count": len(bcc_addresses) if bcc_addresses else 0,
-                "attachments": attached_files if attached_files else None
+                "bcc_count": len(bcc_addresses) if bcc_addresses else 0
             }
 
         except smtplib.SMTPAuthenticationError:
@@ -522,14 +519,17 @@ def send_email_with_template(
     template_type: str,
     template_data: Dict[str, Any],
     cc: Optional[str] = None,
-    bcc: Optional[str] = None,
-    attachments: Optional[List[str]] = None
+    bcc: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     使用预定义模板发送美观的 HTML 邮件
 
     提供多种精美的 HTML 模板，让邮件更加专业美观。
     支持的模板类型：notification（通知）、welcome（欢迎）、alert（警告）、report（报告）
+
+    📁 v3.0 文件约定：
+    - 附件自动从 data/inputs/attachments/ 目录读取
+    - Gateway 会自动下载文件到该目录
 
     Args:
         to: 收件人邮箱地址，多个地址用逗号分隔
@@ -538,7 +538,6 @@ def send_email_with_template(
         template_data: 模板数据，根据不同模板类型需要提供不同的字段
         cc: 抄送地址，多个地址用逗号分隔（可选）
         bcc: 密送地址，多个地址用逗号分隔（可选）
-        attachments: 附件文件路径列表（可选）
 
     模板数据说明：
 
@@ -698,15 +697,14 @@ def send_email_with_template(
         # 渲染模板
         html_body = EMAIL_TEMPLATES[template_type].format(**template_vars)
 
-        # 使用 send_email 发送
+        # 使用 send_email 发送（附件会自动从 data/inputs/attachments/ 读取）
         result = send_email(
             to=to,
             subject=subject,
             body=html_body,
             body_type="html",
             cc=cc,
-            bcc=bcc,
-            attachments=attachments
+            bcc=bcc
         )
 
         # 添加模板信息到返回结果
